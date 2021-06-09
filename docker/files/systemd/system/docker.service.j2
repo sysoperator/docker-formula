@@ -1,0 +1,49 @@
+{% from "docker/map.jinja" import docker with context -%}
+
+{% set network = docker.get('network')|default('') %} 
+
+[Unit]
+Description=Docker Application Container Engine
+Documentation=https://docs.docker.com
+After=network.target docker.socket firewalld.service{% if network == 'flannel' %} flannel.service{% endif %}
+Requires=docker.socket
+
+[Service]
+Type=notify
+{%- if network == 'flannel' %}
+EnvironmentFile=-/run/flannel/subnet.env
+{%- endif %}
+# The default is not to use systemd for cgroups because the delegate issues still
+# exists and systemd currently does not support the cgroup feature set required
+# for containers run by Docker.
+ExecStart=/usr/bin/dockerd \
+    -H fd:// \
+    --storage-driver=overlay2 \
+    --ip-forward=false \
+    --ip-masq=false \
+    --iptables=false{% if network == 'flannel' %} \
+    --bip=${FLANNEL_SUBNET} \
+    --mtu=${FLANNEL_MTU}
+{%- endif %}
+ExecReload=/bin/kill -s HUP $MAINPID
+Restart=on-failure
+RestartSec=10
+LimitNOFILE=1048576
+# Having non-zero Limit*s causes performance problems due to accounting overhead
+# in the kernel. We recommend using cgroups to do container-local accounting.
+LimitNPROC=infinity
+LimitCORE=infinity
+# Uncomment TasksMax if your systemd version supports it.
+# Only systemd 226 and above support this version.
+{% if salt['grains.get']('systemd:version')|int >= 218 %}#{% endif -%}
+TasksMax=infinity
+TimeoutStartSec=0
+{%- if salt['grains.get']('systemd:version')|int >= 218 %}
+# Set delegate yes so that systemd does not reset the cgroups of Docker containers.
+Delegate=yes
+{%- endif %}
+# Kill only the docker process, not all processes in the cgroup.
+KillMode=process
+
+[Install]
+WantedBy=multi-user.target

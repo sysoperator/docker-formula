@@ -1,0 +1,10 @@
+{% set containerd = salt['grains.filter_by']({
+  'Debian': {
+    'pkg_name': 'containerd.io',
+    'version': '1.4.4-1'
+  },
+  'Ubuntu': {
+    'pkg_name': 'containerd.io',
+    'version': '1.4.4-1'
+  },
+}, grain='os', merge=salt['pillar.get']('containerd:lookup')) %}
