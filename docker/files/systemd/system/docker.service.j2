@@ -1,6 +1,7 @@
 {% from "docker/map.jinja" import docker with context -%}
 
-{% set network = docker.get('network')|default('') %} 
+{% set node_roles = salt['grains.get']('roles', []) %}
+{% set network = 'flannel' if (node_roles|select('equalto', 'kube-cluster-member')|list) else (docker.get('network')|default('bridge')) %}
 
 [Unit]
 Description=Docker Application Container Engine
