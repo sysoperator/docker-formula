@@ -1,7 +1,7 @@
 docker:
   lookup:
     dockerd:
-      #network: flannel
+      network:
       daemon:
         experimental: true
         live-restore: true

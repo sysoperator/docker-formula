@@ -1,6 +1,8 @@
 {% from "docker/map.jinja" import docker with context -%}
+{% from "common/vars.jinja" import
+    node_roles
+with context %}
 
-{% set node_roles = salt['grains.get']('roles', []) %}
 {% set network = 'flannel' if (node_roles|select('equalto', 'kube-cluster-member')|list) else (docker.get('network')|default('bridge')) %}
 
 [Unit]
