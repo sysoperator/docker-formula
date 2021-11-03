@@ -51,7 +51,7 @@ docker-apt-pinning:
         Pin: version {{ docker.version }}
         Pin-Priority: 550
 
-{% if node_osarch == 'amd64' %}
+{% if node_osarch == 'amd64' and 'kube-cluster-member' in node_roles %}
 docker-kernel-settings:
   file.replace:
     - name: /etc/default/grub
