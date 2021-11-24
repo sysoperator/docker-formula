@@ -1,0 +1,27 @@
+{% from "docker/map.jinja" import docker with context -%}
+{% from "common/vars.jinja" import
+    node_roles
+with context %}
+
+{% set network = 'flannel' if (node_roles|select('equalto', 'kube-cluster-member')|list) else (docker.get('network')|default('bridge')) %}
+
+{%- if network == 'flannel' %}
+[Unit]
+After=flannel.service
+{%- endif %}
+
+[Service]
+{%- if network == 'flannel' %}
+EnvironmentFile=-/run/flannel/subnet.env
+{%- endif %}
+ExecStart=
+ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock \
+    --storage-driver=overlay2 \
+    --ip-forward=false \
+    --ip-masq=false \
+    --iptables=false{% if network == 'flannel' %} \
+    --bip=${FLANNEL_SUBNET} \
+    --mtu=${FLANNEL_MTU}
+{%- endif %}
+RestartSec=10
+Restart=on-failure

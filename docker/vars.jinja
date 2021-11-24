@@ -1,1 +1,4 @@
 {% from "docker/map.jinja" import docker with context %}
+
+{% set docker_version_deb = docker.version %}
+{% set docker_version = salt['helpers.parse_debver'](docker_version_deb) %}

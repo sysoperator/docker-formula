@@ -1,17 +1,21 @@
 {% from "docker/map.jinja" import docker with context %}
+{% from "docker/vars.jinja" import
+   docker_version
+with context %}
 {% from "common/vars.jinja" import
     node_roles, node_osarch
 with context %}
 
 include:
-{% if 'kube-cluster-member' in node_roles %}
-  - debian/policy
   - debian/grub/update
   - debian/sysctl/ip-forward
+{% if 'kube-cluster-member' in node_roles %}
+  - debian/policy
   - systemd/cmd
 {% endif %}
-  - .repository
   - containerd
+  - .dirs
+  - .repository
 
 extend:
 {% if 'kube-cluster-member' in node_roles %}
@@ -40,7 +44,7 @@ docker:
       - file: policy-rc.d-enable
     - require_in:
       - file: policy-rc.d-disable
-      - file: docker-systemd-unit-file
+      - file: docker-systemd-drop-in
 {% endif %}
 
 docker-apt-pinning:
@@ -51,8 +55,8 @@ docker-apt-pinning:
         Pin: version {{ docker.version }}
         Pin-Priority: 550
 
-{% if node_osarch == 'amd64' and 'kube-cluster-member' in node_roles %}
-docker-kernel-settings:
+{% if node_osarch == 'amd64' %}
+docker-default-kernel-settings:
   file.replace:
     - name: /etc/default/grub
     - pattern: '(^GRUB_CMDLINE_LINUX="(?!.*(cgroup_enable|swapaccount))[^"]*)'
@@ -61,6 +65,18 @@ docker-kernel-settings:
       - pkg: docker
     - watch_in:
       - cmd: grub-update
+
+  {% if (salt['pkg.version_cmp'](docker_version, '20.10.0') < 0) and salt['file.file_exists']('/sys/fs/cgroup/cgroup.controllers') %}
+cgroup-v1-default:
+  file.replace:
+    - name: /etc/default/grub
+    - pattern: '(^GRUB_CMDLINE_LINUX="(?!.*systemd\.unified_cgroup_hierarchy)[^"]*)'
+    - repl: '\1 systemd.unified_cgroup_hierarchy=0'
+    - watch:
+      - file: docker-default-kernel-settings
+    - watch_in:
+      - cmd: grub-update
+  {% endif %}
 {% endif %}
 
 docker-daemon.json:
@@ -72,11 +88,13 @@ docker-daemon.json:
       - service: docker-service-running
 
 {% if 'kube-cluster-member' in node_roles %}
-docker-systemd-unit-file:
+docker-systemd-drop-in:
   file.managed:
-    - name: /etc/systemd/system/docker.service
-    - source: salt://docker/files/systemd/system/docker.service.j2
+    - name: /etc/systemd/system/docker.service.d/override.conf
+    - source: salt://docker/files/systemd/system/docker.service.d/override.conf.j2
     - template: jinja
+    - require:
+      - file: docker-systemd-drop-in-dir
     - require_in:
       - service: docker-service-enable
     - watch_in:
@@ -90,11 +108,12 @@ docker-service-enable:
 docker-service-running:
   service.running:
     - name: docker
-{% if 'kube-cluster-member' in node_roles %}
     - require:
       - sysctl: net.ipv4.ip_forward
+{% if 'kube-cluster-member' in node_roles %}
     - watch:
-      - file: docker-systemd-unit-file
+      - file: docker-systemd-drop-in
+{% endif %}
 
 docker-service-reload:
   service.running:
@@ -102,4 +121,3 @@ docker-service-reload:
     - reload: True
     - watch:
       - file: docker-daemon.json
-{% endif %}

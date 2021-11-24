@@ -1,8 +1,13 @@
 {% from "containerd/map.jinja" import containerd with context %}
+{% from "common/vars.jinja" import
+    node_roles, node_osarch
+with context %}
 
 include:
   - docker.repository
+{% if 'kube-cluster-member' in node_roles %}
   - crictl.install
+{% endif %}
 
 containerd:
   pkg.installed:
@@ -11,8 +16,6 @@ containerd:
     - require:
       - pkgrepo: docker-repository
       - file: containerd-apt-pinning
-    - require_in:
-      - file: crictl
 
 containerd-apt-pinning:
   file.managed:
