@@ -1,8 +1,7 @@
 {% from "docker/map.jinja" import docker with context %}
 
-docker-systemd-drop-in-dir:
+/etc/systemd/system/docker.service.d:
   file.directory:
-    - name: /etc/systemd/system/docker.service.d
     - dir_mode: 755
     - user: root
     - makedirs: True

@@ -79,13 +79,12 @@ cgroup-v1-default:
   {% endif %}
 {% endif %}
 
-docker-daemon.json:
+/etc/docker/daemon.json:
   file.managed:
-    - name: /etc/docker/daemon.json
     - source: salt://docker/files/docker/daemon.json.j2
     - template: jinja
     - require:
-      - service: docker-service-running
+      - service: docker.service-running
 
 {% if 'kube-cluster-member' in node_roles %}
 docker-systemd-drop-in:
@@ -94,18 +93,18 @@ docker-systemd-drop-in:
     - source: salt://docker/files/systemd/system/docker.service.d/override.conf.j2
     - template: jinja
     - require:
-      - file: docker-systemd-drop-in-dir
+      - file: /etc/systemd/system/docker.service.d
     - require_in:
-      - service: docker-service-enable
+      - service: docker.service-enabled
     - watch_in:
       - module: systemctl-reload
 {% endif %}
 
-docker-service-enable:
+docker.service-enabled:
   service.enabled:
     - name: docker
 
-docker-service-running:
+docker.service-running:
   service.running:
     - name: docker
     - require:
@@ -115,9 +114,9 @@ docker-service-running:
       - file: docker-systemd-drop-in
 {% endif %}
 
-docker-service-reload:
+docker.service-reload:
   service.running:
     - name: docker
     - reload: True
     - watch:
-      - file: docker-daemon.json
+      - file: /etc/docker/daemon.json
