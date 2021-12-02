@@ -1,11 +1,11 @@
-{% from "docker/map.jinja" import docker with context -%}
-{% from "common/vars.jinja" import
+{%- set tplroot = tpldir.split('/')[0] -%}
+{%- from tplroot ~ "/map.jinja" import docker with context -%}
+{%- from "common/vars.jinja" import
     node_roles
-with context %}
+-%}
+{%- set network = 'flannel' if (node_roles|select('equalto', 'kube-cluster-member')|list) else (docker.get('network')|default('bridge')) -%}
 
-{% set network = 'flannel' if (node_roles|select('equalto', 'kube-cluster-member')|list) else (docker.get('network')|default('bridge')) %}
-
-{%- if network == 'flannel' %}
+{%- if network == 'flannel' -%}
 [Unit]
 After=flannel.service
 {%- endif %}

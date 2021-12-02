@@ -1,7 +1,7 @@
-{% set osfullname = salt['grains.get']('osfullname')|lower %}
-{% set oscodename = salt['grains.get']('oscodename') %}
+{%- set osfullname = salt['grains.get']('osfullname')|lower -%}
+{%- set oscodename = salt['grains.get']('oscodename') -%}
 
-{% set docker = salt['grains.filter_by']({
+{%- set docker = salt['grains.filter_by']({
   'Debian': {
     'pkg_name': 'docker-ce',
     'version': '5:19.03.11~3-0~' + osfullname + '-' + oscodename
@@ -10,4 +10,4 @@
     'pkg_name': 'docker-ce',
     'version': '5:19.03.11~3-0~' + osfullname + '-' + oscodename
   },
-}, grain='os', merge=salt['pillar.get']('docker:lookup:docker')) %}
+}, grain='os', merge=salt['pillar.get']('docker:lookup:docker')) -%}

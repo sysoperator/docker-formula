@@ -1,7 +1,8 @@
-{% from "containerd/map.jinja" import containerd with context %}
-{% from "common/vars.jinja" import
+{%- set tplroot = tpldir.split('/')[0] %}
+{%- from tplroot ~ "/map.jinja" import containerd with context -%}
+{%- from "common/vars.jinja" import
     node_roles, node_osarch
-with context %}
+-%}
 
 include:
   - docker.repository

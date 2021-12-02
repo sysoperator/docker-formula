@@ -1,3 +1,6 @@
+{%- set tplroot = tpldir.split('/')[0] -%}
+{%- from tplroot ~ "/map.jinja" import docker with context -%}
+
 include:
   - debian/packages/apt-transport-https
   - debian/packages/python3-apt

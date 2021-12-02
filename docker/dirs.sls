@@ -1,4 +1,5 @@
-{% from "docker/map.jinja" import docker with context %}
+{%- set tplroot = tpldir.split('/')[0] -%}
+{%- from tplroot ~ "/map.jinja" import docker with context -%}
 
 /etc/systemd/system/docker.service.d:
   file.directory:

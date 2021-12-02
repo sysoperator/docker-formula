@@ -1,10 +1,11 @@
-{% from "docker/map.jinja" import docker with context %}
-{% from "docker/vars.jinja" import
+{%- set tplroot = tpldir.split('/')[0] -%}
+{%- from tplroot ~ "/map.jinja" import docker with context -%}
+{%- from tplroot ~ "/vars.jinja" import
    docker_version
-with context %}
-{% from "common/vars.jinja" import
+with context -%}
+{%- from "common/vars.jinja" import
     node_roles, node_osarch
-with context %}
+-%}
 
 include:
   - debian/grub/update
@@ -83,6 +84,9 @@ cgroup-v1-default:
   file.managed:
     - source: salt://docker/files/docker/daemon.json.j2
     - template: jinja
+    - context:
+        tpldir: {{ tpldir }}
+        tplroot: {{ tplroot }}
     - require:
       - service: docker.service-running
 
@@ -92,6 +96,9 @@ docker-systemd-drop-in:
     - name: /etc/systemd/system/docker.service.d/override.conf
     - source: salt://docker/files/systemd/system/docker.service.d/override.conf.j2
     - template: jinja
+    - context:
+        tpldir: {{ tpldir }}
+        tplroot: {{ tplroot }}
     - require:
       - file: /etc/systemd/system/docker.service.d
     - require_in:
