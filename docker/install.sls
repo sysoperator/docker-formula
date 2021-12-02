@@ -82,7 +82,7 @@ cgroup-v1-default:
 
 /etc/docker/daemon.json:
   file.managed:
-    - source: salt://docker/files/docker/daemon.json.j2
+    - source: salt://{{ tplroot }}/files/docker/daemon.json.j2
     - template: jinja
     - context:
         tpldir: {{ tpldir }}
@@ -94,7 +94,7 @@ cgroup-v1-default:
 docker-systemd-drop-in:
   file.managed:
     - name: /etc/systemd/system/docker.service.d/override.conf
-    - source: salt://docker/files/systemd/system/docker.service.d/override.conf.j2
+    - source: salt://{{ tplroot }}/files/systemd/system/docker.service.d/override.conf.j2
     - template: jinja
     - context:
         tpldir: {{ tpldir }}
