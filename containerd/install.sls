@@ -24,4 +24,4 @@ containerd-apt-pinning:
     - contents: |
         Package: {{ containerd.pkg_name }}
         Pin: version {{ containerd.version }}
-        Pin-Priority: 550
+        Pin-Priority: 1001

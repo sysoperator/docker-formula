@@ -54,7 +54,7 @@ docker-apt-pinning:
     - contents: |
         Package: {{ docker.pkg_name }}*
         Pin: version {{ docker.version }}
-        Pin-Priority: 550
+        Pin-Priority: 1001
 
 {% if node_osarch == 'amd64' %}
 docker-default-kernel-settings:
