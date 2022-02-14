@@ -4,10 +4,10 @@
 {%- set docker = salt['grains.filter_by']({
   'Debian': {
     'pkg_name': 'docker-ce',
-    'version': '5:19.03.11~3-0~' + osfullname + '-' + oscodename
+    'version': '5:19.03.15~3-0~' + osfullname + '-' + oscodename
   },
   'Ubuntu': {
     'pkg_name': 'docker-ce',
-    'version': '5:19.03.11~3-0~' + osfullname + '-' + oscodename
+    'version': '5:19.03.15~3-0~' + osfullname + '-' + oscodename
   },
 }, grain='os', merge=salt['pillar.get']('docker:lookup:docker')) -%}
