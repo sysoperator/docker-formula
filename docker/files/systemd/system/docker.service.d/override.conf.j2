@@ -1,4 +1,7 @@
 {%- from tplroot ~ "/map.jinja" import docker with context -%}
+{%- from tplroot ~ "/vars.jinja" import
+    docker_version
+with context -%}
 {%- from "common/vars.jinja" import
     node_roles
 -%}
@@ -6,15 +9,17 @@
 
 {%- if network == 'flannel' -%}
 [Unit]
-After=flannel.service
+After=flannel.service{% if salt['grains.get']('os_family') == 'RedHat' %} network.service{% if salt['grains.get']('osfinger') == 'RedHat-7' %} rhel-push-plugin.service registries.service{% endif %}{% endif %}
 {%- endif %}
 
 [Service]
+{%- if salt['pkg.version_cmp'](docker_version, '19.03.0') >= 0 %}
 ExecStart=
 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock \
     --storage-driver=overlay2 \
     --ip-forward=false \
     --ip-masq=true \
     --iptables=true
+{%- endif %}
+Restart={% if salt['grains.get']('os_family') == 'RedHat' %}on-abnormal{% else %}on-failure{% endif %}
 RestartSec=10
-Restart=on-failure

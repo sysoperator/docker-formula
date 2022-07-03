@@ -6,9 +6,9 @@
 
 include:
   - docker.repository
-{% if 'kube-cluster-member' in node_roles %}
+{%- if 'kube-cluster-member' in node_roles %}
   - crictl.install
-{% endif %}
+{%- endif %}
 
 containerd:
   pkg.installed:

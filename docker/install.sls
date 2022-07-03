@@ -1,33 +1,31 @@
 {%- set tplroot = tpldir.split('/')[0] -%}
 {%- from tplroot ~ "/map.jinja" import docker with context -%}
 {%- from tplroot ~ "/vars.jinja" import
-   docker_version
+    docker_version
 with context -%}
 {%- from "common/vars.jinja" import
     node_roles, node_osarch
 -%}
+{%- import_yaml tplroot ~ "/extensions.sls" as _ with context -%}
 
 include:
   - debian/grub/update
   - debian/sysctl/ip-forward
-{% if 'kube-cluster-member' in node_roles %}
+{%- if 'kube-cluster-member' in node_roles %}
+  {%- if salt['grains.get']('os_family') == 'Debian' %}
   - debian/policy
+  {%- endif %}
   - systemd/cmd
-{% endif %}
+{%- endif %}
+{%- if salt['pkg.version_cmp'](docker_version, '19.03.0') >= 0 %}
   - containerd
+{%- endif %}
   - .dirs
   - .repository
 
-extend:
-{% if 'kube-cluster-member' in node_roles %}
-  policy-rc.d-enable:
-    file.managed:
-      - unless: dpkg-query -W -f="\${db:Status-Abbrev}" {{ docker.pkg_name }} 2> /dev/null | grep -q "ii"
-{% endif %}
-  containerd:
-    pkg.installed:
-      - require_in:
-        - pkg: docker
+{%- if _['extensions']['extend'] != None %}
+{{ _['extensions']|yaml(False) }}
+{%- endif %}
 
 docker.io:
   pkg.removed:
@@ -39,15 +37,22 @@ docker:
     - version: {{ docker.version }}
     - require:
       - pkg: docker.io
+  {%- if salt['grains.get']('os_family') == 'Debian' %}
       - pkgrepo: docker-repository
       - file: docker-apt-pinning
-{% if 'kube-cluster-member' in node_roles %}
+  {%- endif %}
+{%- if 'kube-cluster-member' in node_roles %}
+  {%- if salt['grains.get']('os_family') == 'Debian' %}
       - file: policy-rc.d-enable
+  {%- endif %}
     - require_in:
+  {%- if salt['grains.get']('os_family') == 'Debian' %}
       - file: policy-rc.d-disable
+  {%- endif %}
       - file: docker-systemd-drop-in
-{% endif %}
+{%- endif %}
 
+{%- if salt['grains.get']('os_family') == 'Debian' %}
 docker-apt-pinning:
   file.managed:
     - name: /etc/apt/preferences.d/{{ docker.pkg_name }}
@@ -55,8 +60,9 @@ docker-apt-pinning:
         Package: {{ docker.pkg_name }}*
         Pin: version {{ docker.version }}
         Pin-Priority: 1001
+{%- endif %}
 
-{% if node_osarch == 'amd64' %}
+{%- if node_osarch == 'amd64' %}
 docker-default-kernel-settings:
   file.replace:
     - name: /etc/default/grub
@@ -67,7 +73,7 @@ docker-default-kernel-settings:
     - watch_in:
       - cmd: grub-update
 
-  {% if (salt['pkg.version_cmp'](docker_version, '20.10.0') < 0) and salt['file.file_exists']('/sys/fs/cgroup/cgroup.controllers') %}
+  {%- if (salt['pkg.version_cmp'](docker_version, '20.10.0') < 0) and salt['file.file_exists']('/sys/fs/cgroup/cgroup.controllers') %}
 cgroup-v1-default:
   file.replace:
     - name: /etc/default/grub
@@ -77,8 +83,8 @@ cgroup-v1-default:
       - file: docker-default-kernel-settings
     - watch_in:
       - cmd: grub-update
-  {% endif %}
-{% endif %}
+  {%- endif %}
+{%- endif %}
 
 /etc/docker/daemon.json:
   file.managed:
@@ -90,7 +96,7 @@ cgroup-v1-default:
     - require:
       - service: docker.service-running
 
-{% if 'kube-cluster-member' in node_roles %}
+{%- if 'kube-cluster-member' in node_roles %}
 docker-systemd-drop-in:
   file.managed:
     - name: /etc/systemd/system/docker.service.d/override.conf
@@ -105,7 +111,7 @@ docker-systemd-drop-in:
       - service: docker.service-enabled
     - watch_in:
       - module: systemctl-reload
-{% endif %}
+{%- endif %}
 
 docker.service-enabled:
   service.enabled:
@@ -116,10 +122,10 @@ docker.service-running:
     - name: docker
     - require:
       - sysctl: net.ipv4.ip_forward
-{% if 'kube-cluster-member' in node_roles %}
+{%- if 'kube-cluster-member' in node_roles %}
     - watch:
       - file: docker-systemd-drop-in
-{% endif %}
+{%- endif %}
 
 docker.service-reload:
   service.running:
