@@ -6,6 +6,7 @@ with context -%}
     node_roles
 -%}
 {%- set network = 'flannel' if (node_roles|select('equalto', 'kube-cluster-member')|list) else (docker.get('network')|default('bridge')) -%}
+{%- set dns = docker.get('dns') if docker.get('dns')|default('') != 'None' else '' -%}
 
 {%- if network == 'flannel' -%}
 [Unit]
@@ -16,9 +17,9 @@ After=flannel.service{% if salt['grains.get']('os_family') == 'RedHat' %} networ
 {%- if salt['pkg.version_cmp'](docker_version, '19.03.0') >= 0 %}
 ExecStart=
 ExecStart=/usr/bin/dockerd -H fd:// --containerd=/run/containerd/containerd.sock \
-  {%- if docker.dns != '' %}
-    --dns={{ docker.dns }} \
-  {%- endif %}
+{%- if dns != '' %}
+    --dns={{ dns }} \
+{%- endif %}
     --storage-driver=overlay2 \
     --ip-forward=false \
     --ip-masq=true \
