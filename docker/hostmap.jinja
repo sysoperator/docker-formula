@@ -1,0 +1,22 @@
+{%- from "common/vars.jinja" import
+    osfullname, oscodename
+with context -%}
+
+{%- set hostmap = {
+  'gnom': {
+    'pkg_name': 'docker-ce',
+    'version': '5:20.10.17~3-0~' + osfullname + '-' + oscodename
+  },
+  'gryf': {
+    'pkg_name': 'docker-ce',
+    'version': '5:20.10.17~3-0~' + osfullname + '-' + oscodename
+  },
+  'runner-002': {
+    'pkg_name': 'docker-ce',
+    'version': '3:20.10.22-3.el7'
+  },
+  'runner-003': {
+    'pkg_name': 'docker-ce',
+    'version': '3:20.10.22-3.el8'
+  }
+} -%}

@@ -1,10 +1,29 @@
-{%- set containerd = salt['grains.filter_by']({
-  'Debian': {
-    'pkg_name': 'containerd.io',
-    'version': '1.4.4-1'
+{%- from "common/vars.jinja" import
+    osfullname, oscodename
+with context -%}
+
+{%- set tplroot = tpldir.split('/')[0] -%}
+{%- from tplroot ~ "/hostmap.jinja" import hostmap -%}
+{%- from tplroot ~ "/osmap.jinja" import osmap -%}
+{%- from tplroot ~ "/osfingermap.jinja" import osfingermap -%}
+
+{%- set containerd = salt['grains.filter_by'](
+  {
+    'Debian': {
+      'pkg_name': 'containerd.io',
+      'version': '1.6.13-1'
+    },
+    'RedHat': {
+      'pkg_name': 'containerd.io',
+      'version': '1.6.13-3.1.el7'
+    }
   },
-  'Ubuntu': {
-    'pkg_name': 'containerd.io',
-    'version': '1.4.4-1'
-  },
-}, grain='os', merge=salt['pillar.get']('containerd:lookup')) -%}
+  grain='os_family',
+  merge=salt['grains.filter_by'](osmap, grain='os',
+    merge=salt['grains.filter_by'](osfingermap, grain='osfinger',
+      merge=salt['grains.filter_by'](hostmap, grain='host',
+        merge=salt['pillar.get']('containerd:lookup')
+      )
+    )
+  )
+) -%}

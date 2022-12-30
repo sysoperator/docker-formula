@@ -3,6 +3,7 @@
 with context -%}
 
 {%- set tplroot = tpldir.split('/')[0] -%}
+{%- from tplroot ~ "/hostmap.jinja" import hostmap -%}
 {%- from tplroot ~ "/osmap.jinja" import osmap -%}
 {%- from tplroot ~ "/osfingermap.jinja" import osfingermap -%}
 
@@ -10,14 +11,16 @@ with context -%}
   {
     'Debian': {
       'pkg_name': 'docker-ce',
-      'version': '5:19.03.15~3-0~' + osfullname + '-' + oscodename
+      'version': '5:20.10.22~3-0~' + osfullname + '-' + oscodename
     },
     'RedHat': {}
   },
   grain='os_family',
   merge=salt['grains.filter_by'](osmap, grain='os',
     merge=salt['grains.filter_by'](osfingermap, grain='osfinger',
-      merge=salt['pillar.get']('docker:lookup:docker')
+      merge=salt['grains.filter_by'](hostmap, grain='host',
+        merge=salt['pillar.get']('docker:lookup:docker')
+      )
     )
   )
 ) -%}

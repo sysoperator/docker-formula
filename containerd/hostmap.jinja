@@ -1,0 +1,18 @@
+{%- from "common/vars.jinja" import
+    osfullname, oscodename
+with context -%}
+
+{%- set hostmap = {
+  'gnom': {
+    'pkg_name': 'containerd.io',
+    'version': '1.6.6-1'
+  },
+  'gryf': {
+    'pkg_name': 'containerd.io',
+    'version': '1.6.6-1'
+  },
+  'runner-003': {
+    'pkg_name': 'containerd.io',
+    'version': '1.6.13-3.1.el8'
+  }
+} -%}

@@ -16,6 +16,7 @@ containerd:
     - version: {{ containerd.version }}
     - require:
       - pkgrepo: docker-repository
+{%- if salt['grains.get']('os_family') == 'Debian' %}
       - file: containerd-apt-pinning
 
 containerd-apt-pinning:
@@ -25,3 +26,4 @@ containerd-apt-pinning:
         Package: {{ containerd.pkg_name }}
         Pin: version {{ containerd.version }}
         Pin-Priority: 1001
+{%- endif %}
