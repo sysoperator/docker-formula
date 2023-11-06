@@ -1,0 +1,10 @@
+{%- from "common/vars.jinja" import
+    osfullname, oscodename
+with context -%}
+
+{%- set k8smap = {
+  'techmo/development': {
+    'pkg_name': 'docker-ce',
+    'version': '5:20.10.17~3-0~' + osfullname + '-' + oscodename
+  }
+} -%}

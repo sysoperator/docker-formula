@@ -4,6 +4,7 @@ with context -%}
 
 {%- set tplroot = tpldir.split('/')[0] -%}
 {%- from tplroot ~ "/hostmap.jinja" import hostmap -%}
+{%- from tplroot ~ "/k8smap.jinja" import k8smap -%}
 {%- from tplroot ~ "/osmap.jinja" import osmap -%}
 {%- from tplroot ~ "/osfingermap.jinja" import osfingermap -%}
 
@@ -11,15 +12,17 @@ with context -%}
   {
     'Debian': {
       'pkg_name': 'docker-ce',
-      'version': '5:20.10.23~3-0~' + osfullname + '-' + oscodename
+      'version': '5:20.10.24~3-0~' + osfullname + '-' + oscodename
     },
     'RedHat': {}
   },
   grain='os_family',
-  merge=salt['grains.filter_by'](osmap, grain='os',
-    merge=salt['grains.filter_by'](osfingermap, grain='osfinger',
-      merge=salt['grains.filter_by'](hostmap, grain='host',
-        merge=salt['pillar.get']('docker:lookup:docker')
+  merge=salt['grains.filter_by'](k8smap, grain='kubernetes:clustername',
+    merge=salt['grains.filter_by'](osmap, grain='os',
+      merge=salt['grains.filter_by'](osfingermap, grain='osfinger',
+        merge=salt['grains.filter_by'](hostmap, grain='host',
+          merge=salt['pillar.get']('docker:lookup:docker')
+		)
       )
     )
   )

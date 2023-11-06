@@ -8,6 +8,8 @@
 include:
   - debian/packages/apt-transport-https
   - debian/packages/python3-apt
+  - debian/packages/dirmngr
+  - debian/packages/gnupg2
 {%- endif %}
 
 docker-repository:
@@ -19,6 +21,8 @@ docker-repository:
     - require:
       - pkg: apt-transport-https
       - pkg: python3-apt
+      - pkg: dirmngr
+      - pkg: gnupg2
 {%- elif salt['grains.get']('os_family') == 'RedHat' %}
     - name: docker-ce-stable
     - humanname: 'Docker CE Stable - $basearch'

@@ -63,6 +63,7 @@ docker-apt-pinning:
 {%- endif %}
 
 {%- if node_osarch == 'amd64' %}
+  {%- if 'kube-cluster-member' in node_roles %}
 docker-default-kernel-settings:
   file.replace:
     - name: /etc/default/grub
@@ -72,6 +73,7 @@ docker-default-kernel-settings:
       - pkg: docker
     - watch_in:
       - cmd: grub-update
+  {%- endif %}
 
   {%- if (salt['pkg.version_cmp'](docker_version, '20.10.0') < 0) and salt['file.file_exists']('/sys/fs/cgroup/cgroup.controllers') %}
 cgroup-v1-default:

@@ -4,6 +4,7 @@ with context -%}
 
 {%- set tplroot = tpldir.split('/')[0] -%}
 {%- from tplroot ~ "/hostmap.jinja" import hostmap -%}
+{%- from tplroot ~ "/k8smap.jinja" import k8smap -%}
 {%- from tplroot ~ "/osmap.jinja" import osmap -%}
 {%- from tplroot ~ "/osfingermap.jinja" import osfingermap -%}
 
@@ -11,18 +12,17 @@ with context -%}
   {
     'Debian': {
       'pkg_name': 'containerd.io',
-      'version': '1.6.16-1'
+      'version': '1.6.24-1'
     },
-    'RedHat': {
-      'pkg_name': 'containerd.io',
-      'version': '1.6.16-3.1.el7'
-    }
+	'RedHat': {}
   },
   grain='os_family',
-  merge=salt['grains.filter_by'](osmap, grain='os',
-    merge=salt['grains.filter_by'](osfingermap, grain='osfinger',
-      merge=salt['grains.filter_by'](hostmap, grain='host',
-        merge=salt['pillar.get']('containerd:lookup')
+  merge=salt['grains.filter_by'](k8smap, grain='kubernetes:clustername',
+    merge=salt['grains.filter_by'](osmap, grain='os',
+      merge=salt['grains.filter_by'](osfingermap, grain='osfinger',
+        merge=salt['grains.filter_by'](hostmap, grain='host',
+          merge=salt['pillar.get']('containerd:lookup')
+		)
       )
     )
   )

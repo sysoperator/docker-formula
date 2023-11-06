@@ -1,0 +1,14 @@
+{%- from "common/vars.jinja" import
+    osfullname, oscodename
+with context -%}
+
+{%- set k8smap = {
+  'p4/development': {
+	'pkg_name': 'containerd.io',
+	'version': '1.6.21-1'
+  },
+  'techmo/development': {
+	'pkg_name': 'containerd.io',
+	'version': '1.6.6-1'
+  }
+} -%}
