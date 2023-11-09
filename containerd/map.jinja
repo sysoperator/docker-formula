@@ -22,7 +22,7 @@ with context -%}
       merge=salt['grains.filter_by'](osfingermap, grain='osfinger',
         merge=salt['grains.filter_by'](hostmap, grain='host',
           merge=salt['pillar.get']('containerd:lookup')
-		)
+        )
       )
     )
   )
