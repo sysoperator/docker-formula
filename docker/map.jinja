@@ -1,5 +1,5 @@
 {%- from "common/vars.jinja" import
-    osfullname, oscodename
+    os, oscodename, osrelease
 with context -%}
 
 {%- set tplroot = tpldir.split('/')[0] -%}
@@ -12,7 +12,7 @@ with context -%}
   {
     'Debian': {
       'pkg_name': 'docker-ce',
-      'version': '5:20.10.24~3-0~' + osfullname + '-' + oscodename
+      'version': '5:27.2.0-1~' + os + '.' + osrelease + '~' + oscodename
     },
     'RedHat': {}
   },
@@ -22,7 +22,7 @@ with context -%}
       merge=salt['grains.filter_by'](osfingermap, grain='osfinger',
         merge=salt['grains.filter_by'](hostmap, grain='host',
           merge=salt['pillar.get']('docker:lookup:docker')
-		)
+        )
       )
     )
   )

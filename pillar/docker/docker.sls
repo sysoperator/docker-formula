@@ -1,7 +1,7 @@
 docker:
   lookup:
     docker:
-      network:
+      network: bridge
       dns:
       daemon:
         experimental: true
@@ -11,5 +11,6 @@ docker:
         log-opts:
           max-size: 100m
           max-file: "3"
-        native.cgroupdriver: systemd
+        exec-opts:
+          - "native.cgroupdriver=systemd"
 {%- endif %}
