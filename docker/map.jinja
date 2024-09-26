@@ -1,5 +1,5 @@
 {%- from "common/vars.jinja" import
-    os, oscodename, osrelease
+    os, oscodename, osrelease, osmajorrelease
 with context -%}
 
 {%- set tplroot = tpldir.split('/')[0] -%}
@@ -12,9 +12,12 @@ with context -%}
   {
     'Debian': {
       'pkg_name': 'docker-ce',
-      'version': '5:27.2.0-1~' + os + '.' + osrelease + '~' + oscodename
+      'version': '5:27.3.1-1~' + os + '.' + osrelease + '~' + oscodename
     },
-    'RedHat': {}
+    'RedHat': {
+      'pkg_name': 'docker-ce',
+      'version': '3:26.1.3-1.el' + osmajorrelease
+    }
   },
   grain='os_family',
   merge=salt['grains.filter_by'](k8smap, grain='kubernetes:clustername',
