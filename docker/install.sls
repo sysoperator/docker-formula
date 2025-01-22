@@ -10,7 +10,7 @@ with context -%}
 
 include:
   - debian/grub/update
-  - debian/sysctl/ip-forward
+  - sysctl/ip-forward
 {%- if 'kube-cluster-member' in node_roles %}
   {%- if salt['grains.get']('os_family') == 'Debian' %}
   - debian/policy
