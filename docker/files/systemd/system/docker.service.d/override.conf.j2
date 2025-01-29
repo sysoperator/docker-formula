@@ -10,7 +10,7 @@ with context -%}
 
 {%- if network == 'flannel' -%}
 [Unit]
-After=flannel.service{% if salt['grains.get']('os_family') == 'RedHat' %} network.service{% if salt['grains.get']('osfinger') == 'RedHat-7' %} rhel-push-plugin.service registries.service{% endif %}{% endif %}
+After=flannel.service
 {%- endif %}
 
 [Service]
