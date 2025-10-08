@@ -7,7 +7,6 @@
 {%- if salt['grains.get']('os_family') == 'Debian' %}
 include:
   - debian/packages/apt-transport-https
-  - debian/packages/python3-apt
   - debian/packages/dirmngr
   - debian/packages/gnupg2
 {%- endif %}
@@ -20,7 +19,6 @@ docker-repository:
     - key_url: https://download.docker.com/{{ node_kernel_lower }}/{{ grains['os']|lower }}/gpg
     - require:
       - pkg: apt-transport-https
-      - pkg: python3-apt
       - pkg: dirmngr
       - pkg: gnupg2
 {%- elif salt['grains.get']('os_family') == 'RedHat' %}
